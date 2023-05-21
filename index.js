@@ -23,8 +23,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    // Connect the client to the server:
-
+    // Database:
     const carCollection = client.db("solobyDB").collection("cars");
 
     // Fetch all data:
@@ -36,17 +35,18 @@ async function run() {
 
     // Fetch specific users data:
     app.get("/myToys", async (req, res) => {
-      // console.log(req.query);
+      try {
+        let query = {};
+        if (req.query?.email) {
+          query = { email: req.query.email };
+        }
 
-      let query = {};
-      if (req.query?.email) {
-        query = { email: req.query.email };
+        const result = await carCollection.find(query).toArray();
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+        res.status(500).send("Internal Server Error");
       }
-
-      // const { email } = req.query;
-      // const query = email ? { email } : {};
-      const result = await carCollection.find(query).toArray();
-      res.send(result);
     });
 
     // Fetch single toy data:
@@ -84,27 +84,31 @@ async function run() {
 
     // Update a toy:
     app.put("/toyDetails/:id", async (req, res) => {
-      const id = req.params.id;
-      console.log(id, "line: 88");
-      const updatedToy = req.body;
-      console.log(updatedToy, "line: 91");
-      const query = { _id: new ObjectId(id) };
-      console.log(updatedToy.price);
+      try {
+        const id = req.params.id;
+        const updatedToy = req.body;
+        const query = { _id: new ObjectId(id) };
 
-      const toy = {
-        $set: {
-          productsTitle: updatedToy.productsTitle,
-          photoURL: updatedToy.photoURL,
-          quantity: updatedToy.quantity,
-          name: updatedToy.name,
-          email: updatedToy.email,
-        },
-      };
-      const options = {
-        upsert: true,
-      };
-      const result = await carCollection.updateOne(query, toy, options);
-      res.send(result);
+        const toy = {
+          $set: {
+            productsTitle: updatedToy.productsTitle,
+            photoURL: updatedToy.photoURL,
+            quantity: updatedToy.quantity,
+            name: updatedToy.name,
+            email: updatedToy.email,
+          },
+        };
+
+        const options = {
+          upsert: true,
+        };
+
+        const result = await carCollection.updateOne(query, toy, options);
+        res.send(result);
+      } catch (error) {
+        console.log(error);
+        res.status(500).send("Internal Server Error");
+      }
     });
 
     // Delete specific data:
