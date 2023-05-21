@@ -36,7 +36,7 @@ async function run() {
 
     // Fetch specific users data:
     app.get("/myToys", async (req, res) => {
-      console.log(req.query);
+      // console.log(req.query);
 
       let query = {};
       if (req.query?.email) {
@@ -71,7 +71,7 @@ async function run() {
 
       const result = await carCollection.findOne(query, options);
       res.send(result);
-      console.log(result);
+      // console.log(result);
     });
 
     // Add a new car to the collection:
@@ -82,10 +82,35 @@ async function run() {
       res.send(result);
     });
 
+    // Update a toy:
+    app.put("/toyDetails/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id, "line: 88");
+      const updatedToy = req.body;
+      console.log(updatedToy, "line: 91");
+      const query = { _id: new ObjectId(id) };
+      console.log(updatedToy.price);
+
+      const toy = {
+        $set: {
+          productsTitle: updatedToy.productsTitle,
+          photoURL: updatedToy.photoURL,
+          quantity: updatedToy.quantity,
+          name: updatedToy.name,
+          email: updatedToy.email,
+        },
+      };
+      const options = {
+        upsert: true,
+      };
+      const result = await carCollection.updateOne(query, toy, options);
+      res.send(result);
+    });
+
     // Delete specific data:
     app.delete("/myToys/:id", async (req, res) => {
       const id = req.params.id;
-      console.log(id);
+      // console.log(id);
 
       const query = { _id: new ObjectId(id) };
       const result = await carCollection.deleteOne(query);
