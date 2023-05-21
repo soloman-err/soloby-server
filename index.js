@@ -29,7 +29,7 @@ async function run() {
 
     // Fetch all data:
     app.get("/cars", async (req, res) => {
-      const cursor = carCollection.find();
+      const cursor = carCollection.find().limit(20);
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -79,6 +79,16 @@ async function run() {
       const addedToy = req.body;
       console.log(addedToy);
       const result = await carCollection.insertOne(addedToy);
+      res.send(result);
+    });
+
+    // Delete specific data:
+    app.delete("/myToys/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+
+      const query = { _id: new ObjectId(id) };
+      const result = await carCollection.deleteOne(query);
       res.send(result);
     });
 
